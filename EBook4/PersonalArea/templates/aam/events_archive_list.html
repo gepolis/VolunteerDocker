@@ -1,0 +1,144 @@
+
+{% extends "inc/admin_base.html" %}
+{% load static %}
+{% block content %}
+    <!-- Sales Chart Start -->
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">Мероприятия
+                    </h6>
+                    {% if user.role == "methodist" %}
+                        <p>Вы видите только те мероприятия к которым у вас есть доступ.</p>
+                    {% endif %}
+                    <table class="table table-hover" id="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Название</th>
+                            <th scope="col">Дата начала</th>
+                            <th scope="col">Дата конца</th>
+                            <th scope="col">Участников</th>
+                            <th scope="col">Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody">
+                        {% for event in events %}
+                            <tr>
+                                <td><a href="/lk/admin/events/{{ event.id }}/view">{{ event.name }}</a></td>
+                                <td>{{ event.start_date }}</td>
+                                <td>{{ event.end_date }}</td>
+                                <td>{{ event.volunteer.count }}</td>
+                                <td>
+                                    <a class="btn btn-primary" href="/lk/events/{{ event.pk }}/archive"><i
+                                            class="fas fa-box"></i></a>
+                                    <a class="btn btn-primary" href="/lk/events/{{ event.pk }}/export"><i
+                                            class="fas fa-file-download"></i></a>
+                                </td>
+                                <!--<td>
+                                <a class="btn btn-primary"  href="/lk/users/{{user.id}}/view"><i class="fa fa-eye"></i></a>
+                                <a class="btn btn-primary" href="/lk/users/{{user.id}}/edit"><i class="fa fa-user-edit"></i></a>
+                            </td>-->
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" id="prevPage">
+                                    <a class="page-link"
+                                       href="#"
+                                       tabindex="-1" id="prevPageBtn">&laquo;</a>
+                                </li>
+                                <li class="page-item"><input min="1" disabled class="page-link" id="page" placeholder="1"
+                                                             style="width: 48px; text-align: center;" type="number"></li>
+                                <li class="page-item" id="nextPage">
+                                    <a class="page-link" href="#" id="nextPageBtn">&raquo;</a>
+                                </li>
+                            </ul>
+                        </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sales Chart End -->
+    <script src="{% static 'js/api.js' %}"></script>
+
+    <script>
+        let myTable = document.getElementById('tbody');
+
+        function generateRow(data) {
+
+
+            let row = myTable.insertRow();
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let cell4 = row.insertCell(3);
+            let cell5 = row.insertCell(4);
+
+            cell1.innerHTML = `<a href="/lk/admin/events/${ data['id'] }/view/">${ data['name'] }</a>`;
+            cell2.innerHTML = `${data['start_date']}`;
+            cell3.innerHTML = `${data['end_date']}`;
+            cell4.innerHTML = `${data['volunteer_count']}`;
+            cell5.innerHTML = `<a class="btn btn-primary" href="/lk/events/${ data['id'] }/unarchived"><i
+                                            class="fas fa-box-open"></i></a>
+                                    <a class="btn btn-primary" href="/lk/events/${ data['id'] }/export"><i
+                                            class="fas fa-file-download"></i></a>`;
+        }
+
+        const prev = document.querySelector("#prevPage")
+        const next = document.querySelector("#nextPage")
+        const pageInput = document.querySelector("#page")
+        const prevBtn = document.querySelector("#prevPageBtn")
+        const nextBtn = document.querySelector("#nextPageBtn")
+
+
+        var maxPage = 1;
+
+        function getEvents(get = "") {
+            prev.classList.add("disabled")
+            next.classList.add("disabled")
+            apiFetch("events/?archive=1" + get).then((data) => {
+                //staff_count.innerText = data['statictic']['staff']
+                //all_users.innerText = data['statictic']['all']
+                //parents_count.innerText = data['statictic']['parents']
+                //students_counts.innerText = data['statictic']['students']
+
+
+                //myTable.innerHTML = ""
+                pageInput.placeholder = data['page']
+                pageInput.value = data['page']
+                for (let i in data['results']) {
+                    console.log(i)
+                    generateRow(data['results'][i])
+                }
+                var maxPage = data['max']
+                if (data['prev']) {
+                    prev.classList.remove("disabled")
+                    prevBtn.setAttribute('data-url', data['prev'])
+                }
+                if (data['next']) {
+                    next.classList.remove("disabled")
+                    nextBtn.setAttribute('data-url', data['next'])
+                }
+            })
+        }
+
+        pageInput.addEventListener("input", (e) => {
+            getEvents(`?page=${e.target.value}`)
+        })
+        prevBtn.addEventListener("click", (e) => {
+            getEvents(e.target.dataset.url)
+
+        })
+        nextBtn.addEventListener("click", (e) => {
+            getEvents(e.target.dataset.url)
+
+        })
+        getEvents()
+
+
+    </script>
+
+{% endblock content %}

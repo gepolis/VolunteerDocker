@@ -1,0 +1,106 @@
+{% extends "inc/dev_base.html" %}
+{% block content %}
+
+    <!-- Sales Chart Start -->
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">{% if archive %}Архив вопросов{% else %}Вопросы{% endif %}
+                    </h6>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col"><input type="checkbox" class="form-check-input" id="select_all"></th>
+                            <th scope="col">Автор</th>
+                            <th scope="col">Почта</th>
+                            <th scope="col">Телефон</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for fb in fbs %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input data" value="{{ fb.id }}">
+                                </td>
+                                <td>
+                                    <a href="{{ fb.pk }}">{{ fb.name }}</a>
+                                </td>
+                                <td>
+                                    {{ fb.email }}
+                                </td>
+                                <td>
+                                    {{ fb.phone }}
+                                </td>
+                                <!--<td>
+                                <a class="btn btn-primary"  href="/lk/users/{{user.id}}/view"><i class="fa fa-eye"></i></a>
+                                <a class="btn btn-primary" href="/lk/users/{{user.id}}/edit"><i class="fa fa-user-edit"></i></a>
+                            </td>-->
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sales Chart End -->
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <div class="row">
+                        <div class="col-10">
+                            <p>Выбрано: <span id="selected_count"></span></p>
+                        </div>
+                        <div class="col-2">
+                            <form action="" method="post">
+                                <input type="hidden" id="selected_input" name="selected">
+                                <button class="btn btn-danger">Удалить</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <script>
+
+        const select_all = document.querySelector("#select_all")
+        const data = document.querySelectorAll(".data")
+        const selected_count = document.querySelector("#selected_count")
+        const selected_input = document.querySelector("#selected_input")
+
+        const updateSelectedCount = () => {
+            let count = 0;
+            let text = "";
+            data.forEach((ev) => {
+                if (ev.checked) {
+                    count++
+                    text+=`${ev.value}:`
+                }
+            })
+            text = text.slice(0, -1);
+            selected_count.innerHTML = count.toString();
+            selected_input.value = text
+        }
+        document.addEventListener("DOMContentLoaded", function (event) {
+            select_all.addEventListener("click", (e) => {
+                data.forEach((ev) => {
+                    ev.checked = select_all.checked
+                })
+                updateSelectedCount()
+            })
+
+            data.forEach((e) => {
+                e.addEventListener("click", (event) => {
+                    updateSelectedCount()
+                })
+            })
+            updateSelectedCount()
+        })
+
+
+    </script>
+{% endblock content %}

@@ -1,0 +1,36 @@
+{% extends "inc/no_menu_base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container-fluid pt-4 px-4"><div class="row g-4"><div class="col-sm-12 col-xl-12"><div class="bg-light rounded h-100 p-4"><h6 class="mb-4"><a href="/lk/choice/">Назад</a> - Настройки</h6></div></div></div></div>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+            <div class="col-sm-12 col-xl-12">
+
+                <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                    <li class="nav-item"><a class="nav-link active" href="/lk/settings"><i
+                            class="bx bx-user me-1"></i>Основное</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/lk/settings/security/change-password"><i
+                            class="bx bx-bell me-1"></i>Безопасность</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/lk/settings/security/devices"><i
+                            class="bx bx-link-alt me-1"></i>Устройства</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/lk/settings/linking/mosru"><i
+                            class="bx bx-link-alt me-1"></i>МЭШ</a></li>
+                </ul>
+            </div>
+                <div class="bg-light rounded h-100 p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        {% if user.avatar %}
+                        <a href="avatar/remove">Убрать аватарку</a><br>
+
+                        {% endif %}
+                        <br>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

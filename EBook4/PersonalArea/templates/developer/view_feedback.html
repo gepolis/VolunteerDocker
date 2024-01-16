@@ -1,0 +1,110 @@
+{% extends "inc/dev_base.html" %}
+{% block content %}
+
+    <!-- Sales Chart Start -->
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">Вопрос от {{ fb.name }}
+                    </h6>
+                    <span id="question">{{ fb.message }}</span>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if fb.answer %}
+        <div class="container-fluid pt-4 px-4">
+            <div class="row g-4">
+                <div class="col-sm-12 col-xl-12">
+                    <div class="bg-light rounded h-100 p-4">
+                        <h6 class="mb-4">Ответ от {{ fb.answer_by }}
+                        </h6>
+                        <span id="qansw">{{ fb.answer|safe }}</span>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">Ваш ответ
+                    </h6>
+                    <div class="col">
+                        <button class="btn btn-secondary" title="Здравствуйте"
+                                onclick="typeInTextarea('Здравствуйте, {{ fb.name }}, ')"><i
+                                class="fa fa-h"></i></button>
+                        <button class="btn btn-secondary" title="С уважением"
+                                onclick="typeInTextarea('С уважением, {{ user.full_name }}! ')"><i
+                                class="fa fa-b"></i></button>
+                        <button class="btn btn-secondary" title="https://school{% school_number %}.ru/"
+                                onclick="typeInTextarea('https://school{% school_number %}.ru/')"><i class="fa fa-link"></i></button>
+                    </div>
+                    <form action="{{ fb.pk }}/send" method="post">
+                        <textarea name="answer" cols="30" rows="10" class="form-control" id="answer"></textarea>
+                        <br>
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- Sales Chart End -->
+    <script>
+        function typeInTextarea(new_text) {
+            var curPos =
+                document.getElementById("answer").selectionStart;
+            console.log(curPos);
+            let x = $("#answer").val();
+            let text_to_insert = new_text;
+            $("#answer").val(
+                x.slice(0, curPos) + text_to_insert + x.slice(curPos));
+            let end = curPos + text_to_insert.length
+            document.getElementById("answer").setSelectionRange(end, end);
+            document.getElementById("answer").focus();
+
+        }
+
+        const convertLinks = (input) => {
+
+            let text = input;
+            const linksFound = text.match(/(?:www|https?)[^\s]+/g);
+            const aLink = [];
+
+            if (linksFound != null) {
+                for (let i = 0; i < linksFound.length; i++) {
+                    let replace = linksFound[i];
+                    console.log(replace)
+                    let linkText = replace.split('/')[2];
+                    if (linkText.substring(0, 3) == 'www') {
+                        linkText = linkText.replace('www.', '')
+                    }
+                    aLink.push('<a href="' + replace + '" target="_blank">' + linkText + '</a>');
+                    text = text.split(linksFound[i]).map(item => {
+                        return aLink[i].includes('iframe') ? item.trim() : item
+                    }).join(aLink[i]);
+                }
+                return text;
+
+            } else {
+                return input;
+            }
+        }
+        {% if not fb.answer %}
+        const text = document.getElementById("qansw");
+        let al =convertLinks(text.innerHTML);
+        text.innerHTML=al;
+        {% endif %}
+        const q = document.getElementById("question");
+        let ql =convertLinks(q.innerHTML);
+        q.innerHTML=ql;
+
+    </script>
+
+{% endblock content %}

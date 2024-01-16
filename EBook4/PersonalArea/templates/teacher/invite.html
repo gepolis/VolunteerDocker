@@ -1,0 +1,70 @@
+{% extends "inc/teacher_base.html" %}
+
+{% block content %}
+    <div class="container-fluid pt-4 px-4">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="copytext" uuid="{{ uuid }}" disabled
+                   aria-label="Recipient's username" value="{{ invite_url }}"
+                   aria-describedby="basic-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard()" id="copytext_button"><i
+                        class="fas fa-copy"></i></button>
+            </div>
+
+        </div>
+        <a href="/lk/classroom/invite/update/" class="btn btn-secondary">Изменить ссылку</a>
+        <script>
+            //const copytext_button = document.getElementById("copytext_button")
+            //if (!window.isSecureContext) {
+            //    copytext_button.style.display = "None"
+            //}
+            //console.log(window.isSecureContext);
+            //const copyText = document.getElementById("copytext");
+            //let uuid = copyText.getAttribute("uuid")
+            //copyText.setAttribute("value", `${window.location.protocol}//${window.location.host}/lk/classroom/invite/${uuid}`)
+//
+            //function copy_url() {
+            //    // Get the text field
+//
+            //    // Select the text field
+            //    copyText.select();
+            //    copyText.setSelectionRange(0, 99999); // For mobile devices
+//
+            //    // Copy the text inside the text field
+            //    navigator.clipboard.writeText(copyText.value);
+            //}
+            const copyText = document.getElementById("copytext");
+            let uuid = copyText.getAttribute("uuid")
+            copyText.setAttribute("value", `${window.location.protocol}//${window.location.host}/lk/classroom/invite/${uuid}`)
+            async function copyToClipboard() {
+
+                // Navigator clipboard api needs a secure context (https)
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(copyText.value);
+                } else {
+
+                    // Use the 'out of viewport hidden text area' trick
+                    const textArea = document.createElement("textarea");
+                    textArea.value = copyText.value;
+                    // Move textarea out of the viewport so it's not visible
+                    textArea.style.position = "absolute";
+                    textArea.style.left = "-999999px";
+
+                    document.body.prepend(textArea);
+                    textArea.select();
+
+                    try {
+                        document.execCommand('copy');
+                    } catch (error) {
+                        console.error(error);
+                    } finally {
+                        textArea.remove();
+                    }
+                };
+            }
+
+        </script>
+    </div>
+
+
+{% endblock content %}

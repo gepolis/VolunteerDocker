@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /admin/
+Clean-param: ref /some_dir/get_book.pl

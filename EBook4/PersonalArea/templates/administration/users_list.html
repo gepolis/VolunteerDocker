@@ -1,0 +1,462 @@
+{% extends "inc/admin_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .avatar:hover {
+            cursor: pointer;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        @media (max-width: 820px) {
+            .avatar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 756px) {
+
+            .dropdownMenuButtonText {
+                display: none;
+            }
+        }
+    </style>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-users fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Пользователей</p>
+                        <h6 class="mb-0" id="all_users_count"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-child fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Учеников</p>
+                        <h6 class="mb-0" id="students_count"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-user fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Родителей</p>
+                        <h6 class="mb-0" id="parents_count"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fas fa-user-shield fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Сотрудников</p>
+                        <h6 class="mb-0" id="staff_count"></h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sales Chart Start -->
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm col-sm-4">
+                                <h6 class="mb-4">Пользователи</h6>
+                            </div>
+                            <div class="col-sm col-sm-4">
+                                <input type="search" class="form-control" placeholder="Поиск" id="search"
+                                       onkeyup="search()">
+
+                            </div>
+                            <div class="col-sm col-sm-2">
+                                <select id="role-filter" onchange="role_filter(this)" class="form-control">
+                                    <option value="all" {% if not role %}selected{% endif %}>Все</option>
+                                    {% if user.role != "head_teacher" %}
+                                        <option value="director" {% if role == "director" %}selected{% endif %}>
+                                            Директор
+                                        </option>
+                                    {% endif %}
+                                    <option value="teacher" {% if role  == "teacher" %}selected{% endif %}>Учителя
+                                    </option>
+                                    <option value="student" {% if role  == "student" %}selected{% endif %}>Ученики
+                                    </option>
+                                    <option value="methodist" {% if role  == "methodist" %}selected{% endif %}>
+                                        Методисты
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-sm">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#createUserModal">
+                                    <i class="fa fa-plus"></i>
+
+                                </button>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#KeysModal">
+                                    <i class="fa fa-key"></i>
+
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <!--<input type="search" class="form-control" placeholder="Поиск" id="search" onkeyup="search()">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#createUserModal">
+                            <i class="fa fa-plus"></i>
+                        </button>-->
+                    </div>
+                    <!-- Modal -->
+                    <div id="users-spinner">
+                        <div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="users-data" style="display: none">
+                        <!-- Button trigger modal -->
+                        <table class="table table-hover" id="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">ФИО</th>
+                                <th scope="col" class="email-address">Почта</th>
+                                <th scope="col">Роль</th>
+                                <th scope="col">Действия</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tbody">
+                            </tbody>
+                        </table>
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" id="prevPage">
+                                    <a class="page-link"
+                                       href="#"
+                                       tabindex="-1" id="prevPageBtn">&laquo;</a>
+                                </li>
+                                <li class="page-item"><input min="1" disabled class="page-link" id="page"
+                                                             placeholder="1"
+                                                             style="width: 48px; text-align: center;" type="number">
+                                </li>
+                                <li class="page-item" id="nextPage">
+                                    <a class="page-link" href="#" id="nextPageBtn">&raquo;</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Информация</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"
+                            onclick="">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="loader" id="modal_loader">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="information" id="information">
+                        <p>ФИО: <strong id="full_name_model"></strong></p>
+                        <p>Почта: <strong id="email_model"></strong></p>
+                        <p>Роль: <strong id="role_model"></strong></p>
+                        <p>Дата регистрации: <strong id="join_date_model"></strong></p>
+                        <p>Последний вход: <strong id="last_login_model"></strong></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Button trigger modal -->
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Создание пользователя</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'create_user' %}">
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            {% csrf_token %}
+                            {{ create_user_form|crispy }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="KeysModal" tabindex="-1" aria-labelledby="KeysModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Коды подтверждения</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'create_user' %}">
+                    <div class="modal-body">
+
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th scope="col">Роль</th>
+                                <th scope="col">Код подтверждения</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for k in ks %}
+                                <tr>
+                                    <td>{{ k.name }}</td>
+                                    <td>{{ k.password }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Sales Chart End -->
+    <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="overflow: hidden" id="mdp">
+                    <img src="" class="imagepreview" style="width: 470px; height: 470px;">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+
+        $(function () {
+            $('.avatar').on('click', function () {
+                $('.imagepreview').attr('src', $(this).attr('src'));
+                $('#imagemodal').modal('show');
+            });
+        });
+    </script>
+
+    <script>
+        const users = document.querySelectorAll(".user-row")
+
+        function role_filter(e) {
+            if (e.value === "all") {
+                window.location.href = `http://${window.location.host}/lk/users/list?page={{ users.number }}`
+            } else {
+                window.location.href = `http://${window.location.host}/lk/users/list?role=${e.value}&page={{ users.number }}`
+            }
+            //users.forEach((elem) => {
+            //    if (e.value === "all") {
+            //        elem.style.display = ""
+            //    } else {
+            //        if (elem.dataset.role !== e.value) {
+            //            elem.style.display = "none"
+            //        } else {
+            //            elem.style.display = ""
+            //        }
+            //    }
+            //})
+        }
+
+    </script>
+    <script src="{% static 'js/search.js' %}"></script>
+    <script src="{% static 'js/api.js' %}"></script>
+
+    <script>
+        const full_name_text = document.getElementById("full_name_model")
+        const email_text = document.getElementById("email_model")
+        const role_text = document.getElementById("role_model")
+        const join_date_text = document.getElementById("join_date_model")
+        const last_login_text = document.getElementById("last_login_model")
+        const modal = document.getElementById("exampleModal")
+        const loader = document.getElementById("modal_loader")
+        const modal_data = document.getElementById("information")
+
+        function open_user_detail(pk) {
+            modal_data.style = "display: None;"
+            loader.style = "display: block;"
+            get_user_detail(pk)
+
+        }
+
+
+        function get_user_detail(pk) {
+
+            apiFetch(`profile/${pk}`).then((data) => {
+                full_name_text.innerHTML = data.user.full_name
+                email_text.innerHTML = data.user.email
+                role_text.innerHTML = data.user.roles_str
+                join_date_text.innerHTML = data.user.date_joined
+                last_login_text.innerHTML = data.user.last_login
+                loader.style = "display: None;"
+                modal_data.style = "display: block;"
+            })
+
+        }
+
+        let myTable = document.getElementById('tbody');
+
+        function generateRow(data) {
+
+
+            let row = myTable.insertRow();
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let cell4 = row.insertCell(3);
+
+            cell1.innerHTML = `<td> <img class="rounded-circle me-lg-2 avatar" src="${data['get_avatar']}" alt=""style="width: 40px; height: 40px;">${data['full_name']}</td>`;
+            cell2.innerHTML = `${data['email']}`;
+            cell3.innerHTML = `${data['roles_str']}`;
+            cell4.innerHTML = `<div class="dropdown">
+                                        <button class="btn btn-secondary" type="button"
+                                                id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+
+                                            <span class="dropdownMenuButtonText">
+                                                Действия</span>
+                                            <i class="fa-solid fa-caret-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                            <li>
+
+                                                <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                                                        data-bs-target="#exampleModal"
+                                                        onclick="open_user_detail(${data['id']})">
+                                                    Подробнее
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="/lk/admin/users/${data['id']}/edit">Изменить</a>
+                                            </li>
+                                            {% if user.is_superuser %}
+                                                <li>
+                                                    <a href="/lk/admin/users/${data['id']}/login"
+                                                       class="dropdown-item">Войти</a>
+                                                </li>
+                                            {% endif %}
+
+                                            {% if user.role != "head_teacher" %}
+                                                    <li><a class="dropdown-item"
+                                                           href="/lk/admin/users/${data['id']}/delete">Удалить</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>`;
+        }
+
+        const prev = document.querySelector("#prevPage")
+        const next = document.querySelector("#nextPage")
+        const pageInput = document.querySelector("#page")
+        const prevBtn = document.querySelector("#prevPageBtn")
+        const nextBtn = document.querySelector("#nextPageBtn")
+        const users_data = document.querySelector("#users-data")
+        const users_spinner = document.querySelector("#users-spinner")
+        const all_users = document.querySelector("#all_users_count")
+        const students_counts = document.querySelector("#students_count")
+        const parents_count = document.querySelector("#parents_count")
+        const staff_count = document.querySelector("#staff_count")
+
+
+        var maxPage = 1;
+
+        function getUsers(get = "") {
+            prev.classList.add("disabled")
+            next.classList.add("disabled")
+            apiFetch("users/" + get).then((data) => {
+                users_data.style.display = ""
+                users_spinner.style.display = "none"
+                staff_count.innerText = data['statictic']['staff']
+                all_users.innerText = data['statictic']['all']
+                parents_count.innerText = data['statictic']['parents']
+                students_counts.innerText = data['statictic']['students']
+
+
+                myTable.innerHTML = ""
+                pageInput.placeholder = data['page']
+                pageInput.value = data['page']
+                for (let i in data['results']) {
+                    generateRow(data['results'][i])
+                }
+                var maxPage = data['max']
+                if (data['prev']) {
+                    prev.classList.remove("disabled")
+                    prevBtn.setAttribute('data-url', data['prev'])
+                }
+                if (data['next']) {
+                    next.classList.remove("disabled")
+                    nextBtn.setAttribute('data-url', data['next'])
+                }
+            })
+        }
+
+        pageInput.addEventListener("input", (e) => {
+            getUsers(`?page=${e.target.value}`)
+        })
+        prevBtn.addEventListener("click", (e) => {
+            getUsers(e.target.dataset.url)
+
+        })
+        nextBtn.addEventListener("click", (e) => {
+            getUsers(e.target.dataset.url)
+
+        })
+        getUsers()
+
+
+    </script>
+
+    <!---->
+{% endblock content %}

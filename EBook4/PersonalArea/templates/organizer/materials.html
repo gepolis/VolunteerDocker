@@ -1,0 +1,49 @@
+{% extends "inc/org_base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">Материалы</h6>
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+                        {% for m in materials %}
+                            <div class="col">
+                                <div class="card">
+                                        <a href="{{ m.pk }}">{{ m.name }}</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">Загрузка материалов</h6>
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        console.log("test")
+        const filee = document.querySelector("#id_file")
+        console.log(filee)
+        filee.setAttribute('multiple', '');
+
+    </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+{% endblock content %}

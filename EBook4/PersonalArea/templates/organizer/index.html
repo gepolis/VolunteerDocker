@@ -1,0 +1,117 @@
+{% extends "inc/org_base.html" %}
+{% block content %}
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-users fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Учеников</p>
+                        <h6 class="mb-0">{{ students }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-calendar fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Учителей</p>
+                        <h6 class="mb-0">{{ teachers }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-user-plus fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Психологи</p>
+                        <h6 class="mb-0">{{ psychologists }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-building fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Мероприятий</p>
+                        <h6 class="mb-0">{{ events }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sale & Revenue End -->
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-12">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        #calendar {
+            width: 100%;
+        }
+
+        .fc-col-header-cell a {
+            color: #191C24;
+        }
+
+        .fc-timegrid-slot {
+            height: 40px;
+        }
+
+        .fc-event-main {
+            cursor: pointer;
+        }
+    </style>
+
+
+
+{% endblock content %}
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales-all.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var url = `${window.location.protocol}//${window.location.host}/lk/schedule/view/`;
+            var lUrl = `${window.location.protocol}//${window.location.host}/lk/events/all_events/?mode=org`
+            console.log(url)
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                    timeZone: 'UTC',
+                    buttonText: {
+                        today: 'сегодня',
+                        day: 'день',
+                        week: 'неделя',
+                        month: 'месяц'
+                    },
+                    initialView: 'timeGridWeek',
+                    events: lUrl,
+                    allDaySlot: false,
+                    firstDay: 1,
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: ''
+                    },
+                    locale: "ru",
+                    slotMinTime: "08:00",
+                    slotMaxTime: "19:00",
+                    slotLabelFormat:
+                        {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            omitZeroMinute: false,
+                        },
+                    displayEventTime: false
+
+                })
+            ;
+
+            calendar.render();
+        });
+    </script>
+{% endblock js %}

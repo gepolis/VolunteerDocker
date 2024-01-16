@@ -1,0 +1,31 @@
+{% extends "inc/teacher_base.html" %}
+{% block content %}
+<!-- Sales Chart Start -->
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-12">
+            <div class="bg-light rounded h-100 p-4">
+                <h6 class="mb-4">Ученики
+                </h6>
+                <p>Пример файла загрузки учеников:<br>
+                    <code lang="txt">
+                        Зимин Даниэль Сергеевич<br>
+                        Аксенов Артем Денисович<br>
+                        Соловьева Полина Евгеньевна<br>
+                        Мухина Мирослава Андреевна<br>
+                        Новиков Павел Федорович<br>
+                        Жидкова Софья Андреевна
+                    </code>
+                </p>
+                <form method="post" enctype="multipart/form-data">
+                    <input type="file" class="form-control" name="file">
+                    <button class="btn btn-primary" type="submit">Загрузить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Sales Chart End -->
+
+
+{% endblock content %}

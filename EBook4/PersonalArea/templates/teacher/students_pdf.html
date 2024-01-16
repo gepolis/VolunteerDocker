@@ -1,0 +1,47 @@
+<!doctype html>
+
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Ученики</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="UTF-8">
+    <style>
+  @media print {
+    @page {
+      margin: 0;
+    }
+
+    body {
+      margin: 1.6cm;
+    }
+  }
+</style>
+</head>
+<body>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">ФИО</th>
+        <th scope="col">Логин</th>
+        <th scope="col">Пароль</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for member in members %}
+        <tr>
+            <td>{{ member.user.full_name }}</td>
+            <td>{{ member.user.username }}</td>
+            <td>{{ member.password }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script>print()</script>
+</body>
+</html>

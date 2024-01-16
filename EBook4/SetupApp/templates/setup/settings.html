@@ -1,0 +1,23 @@
+{% extends "inc/no_menu_base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-24 col-xl-24">
+                <div class="bg-light rounded h-100 p-4">
+                    <h4 class="mb-4">Настройка школы</h4>
+                    <p>Токен школы - это уникальный код, который формируется при переходе по адресу https://school1236.ru/school/token. Полученный токен используется для передачи статистических данных школы разработчикам проекта, позволяя им осуществлять анализ эффективности работы школы в рамках проекта.</p>
+                    <form method="post" action="" id="register-start">
+                                {% csrf_token %}
+
+                                {{ form|crispy }}
+                                <br>
+                                <button type="submit" class="btn btn-primary py-3 w-100 mb-4 pb-3" id="button">
+                                    Завершить настройку
+                                </button>
+                            </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,75 @@
+{% extends "inc/dev_base.html" %}
+{% block content %}
+
+    <style>
+        .box {
+            height: 100px;
+            border-radius: 3px;
+            border: 2px solid #333;
+        }
+
+    </style>
+    <div class="row">
+        <div class="box col-2">
+            <div class="image" draggable="true">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">test</h6>
+                </div>
+            </div>
+        </div>
+        <div class="box col-2"></div>
+        <div class="box col-4"></div>
+        <div class="box col-2"></div>
+        <div class="box col-2"></div>
+    </div>
+
+    <script>
+        const boxes = document.querySelectorAll(".box")
+        const images = document.querySelectorAll(".image")
+
+        function makeid(length) {
+            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            const charactersLength = characters.length;
+            let counter = 0;
+            while (counter < length) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                counter += 1;
+            }
+            return result;
+        }
+
+
+        images.forEach((image) => {
+            image.addEventListener("dragstart", (e) => {
+                console.log("start")
+                e.target.id = "drop_" + makeid(15);
+                e.dataTransfer.setData("id", e.target.id)
+            })
+            boxes.forEach((box) => {
+                box.addEventListener("dragover", (e) => {
+                    console.log("dragging")
+                    e.preventDefault()
+                })
+
+                box.addEventListener("drop", (ev) => {
+                    console.log("drop")
+                    //if (box.clientWidth === image.clientWidth && box.clientHeight === image.clientHeight) {
+                    let itemId = ev.dataTransfer.getData("id");
+                    let item = document.getElementById(itemId)
+                    console.log(item.clientHeight === ev.target.clientHeight, Math.floor(item.clientWidth / 100) === Math.floor(ev.target.clientWidth / 100))
+                    if (
+                        Math.floor(item.clientHeight / 100) === Math.floor(ev.target.clientHeight / 100) &&
+                        Math.floor(item.clientWidth / 100) === Math.floor(ev.target.clientWidth / 100)
+                    ) {
+                        ev.target.append(item)
+                    }
+
+                    //}
+                })
+            })
+        })
+
+
+    </script>
+{% endblock content %}
