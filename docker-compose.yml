@@ -1,41 +1,61 @@
-version: "3.9"
-   
-services:
-  django:
-    build: ./project
-    command: sh -c "gunicorn --bind 0.0.0.0:8000 volunteer.wsgi"
-    volumes:
-      - ./project:/project
-      - static_data:/project/static
-    expose:
-      - 8000
-    environment:
-      - POSTGRES_NAME=default_db
-      - POSTGRES_USER=gen_user
-      - POSTGRES_PASSWORD=rokf4g6yp2
-      - POSTGRES_HOST=92.255.78.119
-      - TOKEN=nqVeUmakDuByuaHOTojghyKjtANCxKryYUHBThxwlyDFqVuyQwtNTCETvxeakpO
+version: '3'
 
-  db:
-    image: postgres:13-alpine
-    volumes:
-      - pg_data:/var/lib/postgresql/data/
-    expose:
-      - 5432
-    environment:
-      - POSTGRES_USER=django
-      - POSTGRES_PASSWORD=H~+&-6K8X|)k01g!i?72R1eu]
-      - POSTGRES_DB=django
-  nginx:
-    image: nginx:1.19.8-alpine
-    depends_on:
-      - django
-    ports:
-      - "80:80"
-    volumes:
-      - static_data:/var/www/html/static
-      - ./nginx-conf.d:/etc/nginx/conf.d
-
+# хранилища
 volumes:
-  pg_data:
-  static_data:
+    pgdata:
+        driver: local
+services:
+    nginx:
+# при падении будет стараться подняться
+        restart: always
+# только свежий nginx
+        image: nginx:latest
+# слушает порт 8080
+        expose:
+          - 8080
+# мапаем порт 80 на его 8080. Тогда сайт будет доступен по адресу localhost. Убедись, что порт у тебя не занят.
+        ports:
+          - "80:8080"
+# монтируем только те директории, в которых лежит статика, т.к. nginx с динамикой не будет работать. Также директорию с логами и файл настройки, который мы подготовили.
+        volumes:
+            - ./volunteer/static:/srv/www/volunteer/static
+            - ./volunteer/media:/srv/www/volunteer/media
+            - ./volunteer/logs:/srv/www/volunteer/logs
+            - ./docker/nginx:/etc/nginx/conf.d
+# и nginx зависит от контейнера python. Т.е. python должен быть запущен первым
+        depends_on:
+            - python
+    python:
+        restart: always
+# указываем откуда собирать образ
+        build:
+            context: .
+            dockerfile: docker/python/Dockerfile
+        environment:
+          - POSTGRES_NAME=default_db
+          - POSTGRES_USER=gen_user
+          - POSTGRES_PASSWORD=rokf4g6yp2
+          - POSTGRES_HOST=92.255.78.119
+          - TOKEN=nqVeUmakDuByuaHOTojghyKjtANCxKryYUHBThxwlyDFqVuyQwtNTCETvxeakpO
+
+# монтируем директорию проекта
+        volumes:
+            - ./volunteer:/srv/www/volunteer
+        expose:
+          - 8000
+        ports:
+            - 8000:8000
+# запускаем gunicorn
+        command: "gunicorn -c gunicorn.py volunteer.wsgi"
+    postgres:
+# Ниже даже расписывать не хочу, насколько все просто: логин, пароль, БД, порты и т.д.
+        image: postgres:9.3.22
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: username
+            POSTGRES_PASSWORD: postgresql_password
+            POSTGRES_DB: database_name
+            PGDATA: /var/lib/postgresql/data
+        volumes:
+            - pgdata:/var/lib/postgresql/data

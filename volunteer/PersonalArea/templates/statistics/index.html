@@ -1,0 +1,45 @@
+{% extends "inc/no_menu_base.html" %}
+{% load crispy_forms_tags %}
+{% block title %} Статистика {% endblock title %}
+{% block content %}
+
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-12">
+                <div class="bg-light rounded h-90 p-4">
+                    <div class="row">
+                        <div class="col col-10"><h4 class="mb-4">Статистика</h4></div>
+                        <div class="col col-2">
+                            <select name="year" class="form-control">
+                                {% for i in years %}
+                                    <option value="{{ i }}" class="year">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row">
+            {% for k,v in active_types.items %}
+                <div class="col-sm-12 col-md-6 col-xl-4" style="margin-top: 25px">
+                    <a href="{{ v.url }}">
+                        <div class="bg-light rounded h-90 p-4">
+                            <h4 class="mb-4">{{ v.name }}</h4>
+                            <p style="color: var(--bs-secondary)">{{ v.description }}</p>
+                            <img src="/static/peoples/{{ v.image }}.png" alt="" style="width: 250px; height: 250px;">
+                        </div>
+                    </a>
+                </div>
+            {% empty %}
+                <p>К сожалению, ни один из сервисов вам недоступен.</p>
+            {% endfor %}
+        </div>
+    </div>
+    <div style="display: none" id="username">{{ user.full_name }}</div>
+    <div style="display: none" id="classroom">{{ user.get_classroom.id }}</div>
+
+{% endblock content %}
